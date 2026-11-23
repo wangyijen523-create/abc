@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}星際日誌｜每日天文圖{% endblock %}
+{% block content %}
+<section class="hero"><div class="eyebrow"><span class="live-dot"></span> DAILY COSMIC DISCOVERY</div><h1>把宇宙，收藏在<span>今天。</span></h1><p>NASA 每日天文圖帶你看見星系、行星與遙遠時空的故事。</p><div class="api-status">API 狀態 <strong>{{ key_label }}</strong></div></section>
+
+<section class="controls" aria-label="天文圖探索工具">
+  <form method="post" class="control-card"><input type="hidden" name="mode" value="date"><span class="control-icon">◷</span><label for="date">指定日期</label><div class="input-row"><input id="date" name="date" type="date" value="{{ date_value }}" required><button type="submit" aria-label="查詢日期">查看 <span>→</span></button></div><small>從 1995 年 6 月 16 日開始探索</small></form>
+  <form method="post" class="control-card"><input type="hidden" name="mode" value="random"><span class="control-icon">✧</span><label for="count">隨機探索</label><div class="input-row"><select id="count" name="count">{% for n in range(1, 6) %}<option value="{{ n }}" {% if n == 3 %}selected{% endif %}>{{ n }} 張</option>{% endfor %}<option value="10">10 張</option><option value="25">25 張</option></select><button type="submit">抽取 <span>→</span></button></div><small>從 NASA 近期資料中隨機挑選</small></form>
+  <form method="post" class="control-card range-card"><input type="hidden" name="mode" value="range"><span class="control-icon">⌘</span><label>歷史區間</label><div class="input-row"><input aria-label="起始日期" name="start_date" type="date" value="{{ start_value }}" required><span class="date-dash">—</span><input aria-label="結束日期" name="end_date" type="date" value="{{ end_value }}" required><button type="submit" aria-label="查詢日期區間">查詢 <span>→</span></button></div><small>每次最多顯示 25 筆</small></form>
+</section>
+
+{% if error %}<div class="notice error" role="alert"><span>!</span><div><strong>暫時無法載入</strong><p>{{ error }}</p></div></div>{% endif %}
+{% if records %}
+  {% if mode == 'today' %}<div class="section-heading"><div><span class="eyebrow">TODAY'S FEATURE</span><h2>今日天文圖</h2></div><span class="date-chip">{{ records[0].date or '' }}</span></div>
+  {% elif mode == 'date' %}<div class="section-heading"><div><span class="eyebrow">ON THIS DAY</span><h2>指定日期</h2></div></div>
+  {% elif mode == 'range' %}<div class="section-heading"><div><span class="eyebrow">APOD ARCHIVE</span><h2>歷史探索</h2></div><span class="date-chip">{{ records|length }} 筆資料</span></div>
+  {% else %}<div class="section-heading"><div><span class="eyebrow">RANDOM DISCOVERY</span><h2>隨機宇宙漫遊</h2></div><span class="date-chip">{{ records|length }} 張</span></div>{% endif %}
+  <section class="gallery {% if mode == 'today' or mode == 'date' %}single{% endif %}">
+  {% for item in records %}<article class="apod-card">
+    <div class="media-frame">
+      {% if item.media_type == 'image' and item.url %}<a href="{{ item.hdurl or item.url }}" target="_blank" rel="noopener noreferrer"><img src="{{ item.url }}" alt="{{ item.alt or item.title or 'NASA 天文影像' }}" loading="lazy"></a>
+      {% elif item.media_type == 'video' and item.url %}<div class="media-placeholder"><span>▶</span><p>今日內容為影片</p><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">前往 NASA 觀看影片 ↗</a></div>
+      {% elif item.url %}<div class="media-placeholder"><span>✧</span><p>此內容使用 {{ item.media_type or '其他' }} 媒體格式</p><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">開啟 NASA 內容 ↗</a></div>
+      {% else %}<div class="media-placeholder"><span>✧</span><p>目前沒有可顯示的影像</p></div>{% endif %}
+      {% if item.media_type == 'image' and item.hdurl %}<a class="hd-link" href="{{ item.hdurl }}" target="_blank" rel="noopener noreferrer">高清影像 ↗</a>{% endif %}
+    </div>
+    <div class="card-copy"><div class="meta-line"><time>{{ item.date or '日期未提供' }}</time>{% if item.media_type %}<span>{{ item.media_type }}</span>{% endif %}</div><h3>{{ item.title or '未命名天文圖' }}</h3><div class="explanation">{{ item.explanation or 'NASA 尚未提供這張天文圖的說明。' }}</div>
+      {% if item.credit or item.copyright %}<p class="credit">{% if item.credit %}影像來源：{{ item.credit }}{% endif %}{% if item.credit and item.copyright %} · {% endif %}{% if item.copyright %}© {{ item.copyright }}{% endif %}</p>{% endif %}
+      {% if item.permalink or item.url %}<a class="text-link" href="{{ item.permalink or item.url }}" target="_blank" rel="noopener noreferrer">在 NASA 網站閱讀 <span>↗</span></a>{% endif %}
+    </div>
+  </article>{% endfor %}
+  </section>
+{% elif not error %}<div class="notice"><span>✧</span><div><strong>今天的宇宙稍作休息</strong><p>目前沒有可顯示的 APOD，請稍後再回來看看。</p></div></div>{% endif %}
+{% endblock %}

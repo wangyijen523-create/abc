@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>{% block title %}星際日誌｜NASA APOD{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/" aria-label="星際日誌首頁"><span class="brand-mark">✦</span> 星際日誌</a><span class="top-note">NASA 每日天文圖</span></header>
+  <main>{% block content %}{% endblock %}</main>
+  <footer>探索宇宙，每天一點點 <span>✧</span> 資料與影像版權歸原創作者及 NASA 所有</footer>
+</body>
+</html>
